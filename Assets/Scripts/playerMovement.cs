@@ -6,10 +6,13 @@ public class playerMovement : MonoBehaviour {
 
     public int movementSpeed = 1;
     public int jumpStrength = 10;
-
+    
     public bool inAir;
-    public bool canMoveRight =true;
-    public bool canMoveLeft  =true;
+    public bool ethereal;
+
+    public float etherealDuration = 1;
+
+    private float _etherealDur;
     private Rigidbody rb;
 
     // Use this for initialization
@@ -22,34 +25,85 @@ public class playerMovement : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
+        Debug.Log(Physics.GetIgnoreLayerCollision(29, 31));
+        Debug.DrawRay(transform.position, Vector3.down , Color.blue);
+        if (ethereal)
+        {
+            _etherealDur -= Time.deltaTime;
+            if(_etherealDur <= 0)
+            {
+                Physics.IgnoreLayerCollision(29, 31, false);
+                ethereal = false;
+                rb.useGravity = true;
+                _etherealDur = etherealDuration;
+            }
+        }
         physicsCheck();
-        debugs();
         keyboardInput();
     }
-
-
-
     void keyboardInput()
     {
-        if (Input.GetKey(KeyCode.D))                                                    //right
+        if (!ethereal)
         {
-            rb.velocity += new Vector3(movementSpeed, 0, 0) * Time.deltaTime;
+            if (Input.GetKey(KeyCode.D))                                                    //right
+            {
+                rb.velocity += new Vector3(movementSpeed, 0, 0) * Time.deltaTime;
+            }
+            else if (Input.GetKey(KeyCode.A))                                               //left
+            {
+                rb.velocity += new Vector3(-movementSpeed, 0, 0) * Time.deltaTime;
+            }
+            if (Input.GetKey(KeyCode.W) && !inAir)                                     //jump
+            {
+                float x = rb.velocity.x;
+                rb.velocity = new Vector3(x, jumpStrength * Time.deltaTime, 0);
+            }
+
+            if (Input.GetKey(KeyCode.Space))
+            {
+                ethereal = true;
+                rb.useGravity = false;
+                rb.velocity = Vector3.zero;
+                Physics.IgnoreLayerCollision(29, 31);
+
+            }
         }
-        else if (Input.GetKey(KeyCode.A) )                                               //left
+        else
         {
-            rb.velocity += new Vector3(-movementSpeed, 0, 0) * Time.deltaTime;
-        }
-        else if (Input.GetKey(KeyCode.W) && !inAir)                                     //jump
-        {
-            rb.velocity = new Vector3(0, jumpStrength, 0);
+            if (Input.GetKey(KeyCode.D))                                                    //right
+            {
+                transform.position += new Vector3(movementSpeed, 0, 0) * Time.deltaTime;
+                //rb.velocity += new Vector3(movementSpeed, 0, 0) * Time.deltaTime;
+            }
+            else if (Input.GetKey(KeyCode.A))                                               //left
+            {
+                transform.position += new Vector3(-movementSpeed, 0, 0) * Time.deltaTime;
+
+                //rb.velocity += new Vector3(-movementSpeed, 0, 0) * Time.deltaTime;
+            }
+            if (Input.GetKey(KeyCode.W))                                        //float up
+            {
+                transform.position += new Vector3(0, movementSpeed, 0) * Time.deltaTime;
+
+                //rb.velocity = new Vector3(0, jumpStrength * Time.deltaTime, 0);
+            }
+            else if (Input.GetKey(KeyCode.S))                                     //float down
+            {
+                transform.position += new Vector3(0 , -movementSpeed, 0) * Time.deltaTime;
+
+                //rb.velocity = new Vector3(0, -jumpStrength * Time.deltaTime, 0);
+            }
+
+            //if (Input.GetKey(KeyCode.Space))
+            //{
+            //    ethereal = true;
+            //}
         }
     }
-
-    
 
     void physicsCheck()
     {
-        if(Physics.Raycast(transform.position, Vector3.down,  1))
+        if(Physics.Raycast(transform.position, Vector3.down, 0.2f))
         {
             inAir = false;
         }
@@ -57,26 +111,7 @@ public class playerMovement : MonoBehaviour {
         {
             inAir = true;
         }
-
-        //if (Physics.Raycast(transform.position, Vector3.right, movementSpeed * Time.deltaTime))
-        //{
-        //    canMoveRight = false;
-        //}
-        //else canMoveRight = true;
-
-        //if (Physics.Raycast(transform.position, Vector3.left, -movementSpeed * Time.deltaTime))
-        //{
-        //    canMoveLeft = false;
-        //}
-        //else canMoveLeft = true;
     }
-
-    void debugs()
-    {
-        Debug.DrawLine(transform.position, transform.position + Vector3.right , Color.red);
-        Debug.DrawLine(transform.position, transform.position + Vector3.left, Color.red);
-    }
-
 }
 
 
