@@ -14,6 +14,7 @@ public class playerMovement : MonoBehaviour {
 
     private float _etherealDur;
     private Rigidbody rb;
+    private Vector3 platformNormal;
 
     // Use this for initialization
     void Start() {
@@ -25,8 +26,6 @@ public class playerMovement : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
-        Debug.Log(Physics.GetIgnoreLayerCollision(29, 31));
-        Debug.DrawRay(transform.position, Vector3.down , Color.blue);
         if (ethereal)
         {
             _etherealDur -= Time.deltaTime;
@@ -47,11 +46,17 @@ public class playerMovement : MonoBehaviour {
         {
             if (Input.GetKey(KeyCode.D))                                                    //right
             {
-                rb.velocity += new Vector3(movementSpeed, 0, 0) * Time.deltaTime;
+                Vector3 temp = Vector3.Cross(platformNormal, new Vector3(movementSpeed, 0, 0) );
+                Vector3 dir =  Vector3.Cross(temp, platformNormal);
+
+                rb.velocity += dir * Time.deltaTime;
             }
             else if (Input.GetKey(KeyCode.A))                                               //left
             {
-                rb.velocity += new Vector3(-movementSpeed, 0, 0) * Time.deltaTime;
+                Vector3 temp = Vector3.Cross(platformNormal, new Vector3(movementSpeed, 0, 0));
+                Vector3 dir = Vector3.Cross(temp, platformNormal);
+
+                rb.velocity -= dir * Time.deltaTime;
             }
             if (Input.GetKey(KeyCode.W) && !inAir)                                     //jump
             {
@@ -73,45 +78,40 @@ public class playerMovement : MonoBehaviour {
             if (Input.GetKey(KeyCode.D))                                                    //right
             {
                 transform.position += new Vector3(movementSpeed, 0, 0) * Time.deltaTime;
-                //rb.velocity += new Vector3(movementSpeed, 0, 0) * Time.deltaTime;
             }
             else if (Input.GetKey(KeyCode.A))                                               //left
             {
                 transform.position += new Vector3(-movementSpeed, 0, 0) * Time.deltaTime;
-
-                //rb.velocity += new Vector3(-movementSpeed, 0, 0) * Time.deltaTime;
             }
             if (Input.GetKey(KeyCode.W))                                        //float up
             {
                 transform.position += new Vector3(0, movementSpeed, 0) * Time.deltaTime;
-
-                //rb.velocity = new Vector3(0, jumpStrength * Time.deltaTime, 0);
             }
             else if (Input.GetKey(KeyCode.S))                                     //float down
             {
                 transform.position += new Vector3(0 , -movementSpeed, 0) * Time.deltaTime;
-
-                //rb.velocity = new Vector3(0, -jumpStrength * Time.deltaTime, 0);
             }
-
-            //if (Input.GetKey(KeyCode.Space))
-            //{
-            //    ethereal = true;
-            //}
         }
     }
 
     void physicsCheck()
     {
-        if(Physics.Raycast(transform.position, Vector3.down, 0.2f))
+        RaycastHit ray;
+        if(Physics.Raycast(transform.position, Vector3.down , out ray , 0.2f))
         {
             inAir = false;
+            platformNormal =  ray.normal;
         }
         else
         {
             inAir = true;
         }
     }
+
+
+    
+
+
 }
 
 
