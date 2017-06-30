@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class playerMovement : MonoBehaviour {
 
@@ -11,8 +12,12 @@ public class playerMovement : MonoBehaviour {
     public bool ethereal;
 
     public float etherealDuration = 1;
+    public float etherealCooldown = 3;
+
+    public GameObject cooldownTimer;
 
     private float _etherealDur;
+    private float _etherealCD;
     private Rigidbody rb;
     private Vector3 platformNormal;
 
@@ -22,10 +27,14 @@ public class playerMovement : MonoBehaviour {
         {
             rb = GetComponent<Rigidbody>();
         }
+        _etherealCD = 3;
+        cooldownTimer.GetComponent<Image>().fillAmount = _etherealCD / etherealCooldown;
     }
 
     // Update is called once per frame
     void Update() {
+        Vector3 pos = new Vector3(transform.position.x, transform.position.y + 0.2f, transform.position.z);
+        Debug.DrawRay(pos, new Vector3(0, -0.2f, 0), Color.red);
         if (ethereal)
         {
             _etherealDur -= Time.deltaTime;
@@ -37,6 +46,14 @@ public class playerMovement : MonoBehaviour {
                 _etherealDur = etherealDuration;
             }
         }
+
+        if (_etherealCD < etherealCooldown)
+        {
+            _etherealCD += Time.deltaTime;
+            cooldownTimer.GetComponent<Image>().fillAmount = _etherealCD / etherealCooldown ;
+        }
+        
+
         physicsCheck();
         keyboardInput();
     }
@@ -46,17 +63,22 @@ public class playerMovement : MonoBehaviour {
         {
             if (Input.GetKey(KeyCode.D))                                                    //right
             {
-                Vector3 temp = Vector3.Cross(platformNormal, new Vector3(movementSpeed, 0, 0) );
-                Vector3 dir =  Vector3.Cross(temp, platformNormal);
+                Vector3 temp = Vector3.Cross(platformNormal, new Vector3(movementSpeed, 0, 0));
+                Vector3 dir = Vector3.Cross(temp, platformNormal);
+                Debug.Log(dir);
 
+                transform.rotation = Quaternion.Euler(0, 90, 0);
                 rb.velocity += dir * Time.deltaTime;
+
             }
             else if (Input.GetKey(KeyCode.A))                                               //left
             {
-                Vector3 temp = Vector3.Cross(platformNormal, new Vector3(movementSpeed, 0, 0));
+                Vector3 temp = Vector3.Cross(platformNormal, new Vector3(-movementSpeed, 0, 0));
                 Vector3 dir = Vector3.Cross(temp, platformNormal);
+                Debug.Log(dir);
 
-                rb.velocity -= dir * Time.deltaTime;
+                transform.rotation = Quaternion.Euler(0, 270, 0);
+                rb.velocity += dir * Time.deltaTime;
             }
             if (Input.GetKey(KeyCode.W) && !inAir)                                     //jump
             {
@@ -64,13 +86,13 @@ public class playerMovement : MonoBehaviour {
                 rb.velocity = new Vector3(x, jumpStrength * Time.deltaTime, 0);
             }
 
-            if (Input.GetKey(KeyCode.Space))
+            if (Input.GetKey(KeyCode.Space) && _etherealCD >= etherealCooldown)
             {
+                _etherealCD = 0;
                 ethereal = true;
                 rb.useGravity = false;
                 rb.velocity = Vector3.zero;
                 Physics.IgnoreLayerCollision(29, 31);
-
             }
         }
         else
@@ -78,10 +100,12 @@ public class playerMovement : MonoBehaviour {
             if (Input.GetKey(KeyCode.D))                                                    //right
             {
                 transform.position += new Vector3(movementSpeed, 0, 0) * Time.deltaTime;
+                transform.rotation = Quaternion.Euler(0, 90, 0);
             }
             else if (Input.GetKey(KeyCode.A))                                               //left
             {
                 transform.position += new Vector3(-movementSpeed, 0, 0) * Time.deltaTime;
+                transform.rotation = Quaternion.Euler(0, 270, 0);
             }
             if (Input.GetKey(KeyCode.W))                                        //float up
             {
@@ -89,7 +113,7 @@ public class playerMovement : MonoBehaviour {
             }
             else if (Input.GetKey(KeyCode.S))                                     //float down
             {
-                transform.position += new Vector3(0 , -movementSpeed, 0) * Time.deltaTime;
+                transform.position += new Vector3(0, -movementSpeed, 0) * Time.deltaTime;
             }
         }
     }
@@ -97,7 +121,8 @@ public class playerMovement : MonoBehaviour {
     void physicsCheck()
     {
         RaycastHit ray;
-        if(Physics.Raycast(transform.position, Vector3.down , out ray , 0.2f))
+        Vector3 pos = new Vector3(transform.position.x, transform.position.y + 0.2f, transform.position.z);
+        if(Physics.Raycast(pos, Vector3.down , out ray , 0.3f))
         {
             inAir = false;
             platformNormal =  ray.normal;
@@ -105,6 +130,7 @@ public class playerMovement : MonoBehaviour {
         else
         {
             inAir = true;
+            platformNormal = Vector3.up;
         }
     }
 
