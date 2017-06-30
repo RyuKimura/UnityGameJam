@@ -34,13 +34,14 @@ public class playerMovement : MonoBehaviour {
     // Update is called once per frame
     void Update() {
         Debug.Log(platformNormal);
-        Debug.DrawRay(transform.localPosition, new Vector3(0, -0.2f, 0), Color.red);
+        Vector3 pos = new Vector3(transform.position.x, transform.position.y + 0.2f, transform.position.z);
+        Debug.DrawRay(pos, new Vector3(0, -0.2f, 0), Color.red);
         if (ethereal)
         {
             _etherealDur -= Time.deltaTime;
             if(_etherealDur <= 0)
             {
-                Physics.IgnoreLayerCollision(29, 30, false);
+                Physics.IgnoreLayerCollision(29, 31, false);
                 ethereal = false;
                 rb.useGravity = true;
                 _etherealDur = etherealDuration;
@@ -88,7 +89,7 @@ public class playerMovement : MonoBehaviour {
                 ethereal = true;
                 rb.useGravity = false;
                 rb.velocity = Vector3.zero;
-                Physics.IgnoreLayerCollision(29, 30);
+                Physics.IgnoreLayerCollision(29, 31);
             }
         }
         else
@@ -117,7 +118,8 @@ public class playerMovement : MonoBehaviour {
     void physicsCheck()
     {
         RaycastHit ray;
-        if(Physics.Raycast(transform.localPosition, Vector3.down , out ray , 0.2f))
+        Vector3 pos = new Vector3(transform.position.x, transform.position.y + 0.2f, transform.position.z);
+        if(Physics.Raycast(pos, Vector3.down , out ray , 0.3f))
         {
             Debug.Log(ray.transform.name);
             inAir = false;
