@@ -19,9 +19,9 @@ public class EnemyAI : MonoBehaviour {
     // Update is called once per frame
     void Update () {
         RaycastHit ray;
-        Physics.Raycast(transform.position, Vector3.down, out ray, 0.2f);
+        Physics.Raycast(transform.position, Vector3.down, out ray, 1f);
         platformNormal = ray.normal;
-
+        Debug.DrawRay(transform.position, new Vector3(0,-1f,0), Color.green);
 
         Vector3 temp = Vector3.Cross(platformNormal, new Vector3(moveSpeed, 0, 0));
         Vector3 dir = Vector3.Cross(temp, platformNormal);
