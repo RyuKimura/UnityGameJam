@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class playerMovement : MonoBehaviour {
 
@@ -11,8 +12,12 @@ public class playerMovement : MonoBehaviour {
     public bool ethereal;
 
     public float etherealDuration = 1;
+    public float etherealCooldown = 3;
+
+    public GameObject cooldownTimer;
 
     private float _etherealDur;
+    private float _etherealCD;
     private Rigidbody rb;
     private Vector3 platformNormal;
 
@@ -22,22 +27,33 @@ public class playerMovement : MonoBehaviour {
         {
             rb = GetComponent<Rigidbody>();
         }
+        _etherealCD = 3;
+        cooldownTimer.GetComponent<Image>().fillAmount = _etherealCD / etherealCooldown;
     }
 
     // Update is called once per frame
     void Update() {
-        Debug.DrawRay(transform.position, new Vector3(0, -0.2f, 0) , Color.green);
+        Debug.Log(platformNormal);
+        Debug.DrawRay(transform.localPosition, new Vector3(0, -0.2f, 0), Color.red);
         if (ethereal)
         {
             _etherealDur -= Time.deltaTime;
             if(_etherealDur <= 0)
             {
-                Physics.IgnoreLayerCollision(29, 31, false);
+                Physics.IgnoreLayerCollision(29, 30, false);
                 ethereal = false;
                 rb.useGravity = true;
                 _etherealDur = etherealDuration;
             }
         }
+
+        if (_etherealCD < etherealCooldown)
+        {
+            _etherealCD += Time.deltaTime;
+            cooldownTimer.GetComponent<Image>().fillAmount = _etherealCD / etherealCooldown ;
+        }
+        
+
         physicsCheck();
         keyboardInput();
     }
@@ -66,12 +82,13 @@ public class playerMovement : MonoBehaviour {
                 rb.velocity = new Vector3(x, jumpStrength * Time.deltaTime, 0);
             }
 
-            if (Input.GetKey(KeyCode.Space))
+            if (Input.GetKey(KeyCode.Space) && _etherealCD >= etherealCooldown)
             {
+                _etherealCD = 0;
                 ethereal = true;
                 rb.useGravity = false;
                 rb.velocity = Vector3.zero;
-                Physics.IgnoreLayerCollision(29, 31);
+                Physics.IgnoreLayerCollision(29, 30);
             }
         }
         else
@@ -100,8 +117,9 @@ public class playerMovement : MonoBehaviour {
     void physicsCheck()
     {
         RaycastHit ray;
-        if(Physics.Raycast(transform.position, Vector3.down , out ray , 0.2f))
+        if(Physics.Raycast(transform.localPosition, Vector3.down , out ray , 0.2f))
         {
+            Debug.Log(ray.transform.name);
             inAir = false;
             platformNormal =  ray.normal;
         }
