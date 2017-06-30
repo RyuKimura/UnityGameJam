@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class playerMovement : MonoBehaviour {
 
@@ -119,7 +120,11 @@ public class playerMovement : MonoBehaviour {
                 transform.position += new Vector3(0, -movementSpeed, 0) * Time.deltaTime;
             }
         }
-        if(Input.GetKey(KeyCode.None)) anim.SetBool("Moving", false);
+        if (Input.GetKey(KeyCode.D))                                                    //right
+        {
+            SceneManager.LoadScene("Greybox level");
+        }
+            if (Input.GetKey(KeyCode.None)) anim.SetBool("Moving", false);
     }
 
     void physicsCheck()
