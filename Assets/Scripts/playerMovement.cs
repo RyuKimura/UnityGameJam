@@ -33,7 +33,6 @@ public class playerMovement : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
-        Debug.Log(platformNormal);
         Vector3 pos = new Vector3(transform.position.x, transform.position.y + 0.2f, transform.position.z);
         Debug.DrawRay(pos, new Vector3(0, -0.2f, 0), Color.red);
         if (ethereal)
@@ -66,16 +65,20 @@ public class playerMovement : MonoBehaviour {
             {
                 Vector3 temp = Vector3.Cross(platformNormal, new Vector3(movementSpeed, 0, 0));
                 Vector3 dir = Vector3.Cross(temp, platformNormal);
+                Debug.Log(dir);
+
                 transform.rotation = Quaternion.Euler(0, 90, 0);
                 rb.velocity += dir * Time.deltaTime;
 
             }
             else if (Input.GetKey(KeyCode.A))                                               //left
             {
-                Vector3 temp = Vector3.Cross(platformNormal, new Vector3(movementSpeed, 0, 0));
+                Vector3 temp = Vector3.Cross(platformNormal, new Vector3(-movementSpeed, 0, 0));
                 Vector3 dir = Vector3.Cross(temp, platformNormal);
+                Debug.Log(dir);
+
                 transform.rotation = Quaternion.Euler(0, 270, 0);
-                rb.velocity -= dir * Time.deltaTime;
+                rb.velocity += dir * Time.deltaTime;
             }
             if (Input.GetKey(KeyCode.W) && !inAir)                                     //jump
             {
@@ -121,7 +124,6 @@ public class playerMovement : MonoBehaviour {
         Vector3 pos = new Vector3(transform.position.x, transform.position.y + 0.2f, transform.position.z);
         if(Physics.Raycast(pos, Vector3.down , out ray , 0.3f))
         {
-            Debug.Log(ray.transform.name);
             inAir = false;
             platformNormal =  ray.normal;
         }
