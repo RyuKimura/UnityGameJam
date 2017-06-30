@@ -11,6 +11,8 @@ public class playerMovement : MonoBehaviour {
     public bool inAir;
     public bool ethereal;
 
+    public Animator anim;
+
     public float etherealDuration = 1;
     public float etherealCooldown = 3;
 
@@ -28,19 +30,20 @@ public class playerMovement : MonoBehaviour {
             rb = GetComponent<Rigidbody>();
         }
         _etherealCD = 3;
+        ethereal = false;
         cooldownTimer.GetComponent<Image>().fillAmount = _etherealCD / etherealCooldown;
     }
 
     // Update is called once per frame
     void Update() {
         Vector3 pos = new Vector3(transform.position.x, transform.position.y + 0.2f, transform.position.z);
-        Debug.DrawRay(pos, new Vector3(0, -0.2f, 0), Color.red);
+
         if (ethereal)
         {
             _etherealDur -= Time.deltaTime;
             if(_etherealDur <= 0)
             {
-                Physics.IgnoreLayerCollision(29, 31, false);
+                Physics.IgnoreLayerCollision(29, 30, false);
                 ethereal = false;
                 rb.useGravity = true;
                 _etherealDur = etherealDuration;
@@ -59,13 +62,13 @@ public class playerMovement : MonoBehaviour {
     }
     void keyboardInput()
     {
+        anim.SetBool("Moving", true);
         if (!ethereal)
         {
             if (Input.GetKey(KeyCode.D))                                                    //right
             {
                 Vector3 temp = Vector3.Cross(platformNormal, new Vector3(movementSpeed, 0, 0));
                 Vector3 dir = Vector3.Cross(temp, platformNormal);
-                Debug.Log(dir);
 
                 transform.rotation = Quaternion.Euler(0, 90, 0);
                 rb.velocity += dir * Time.deltaTime;
@@ -92,7 +95,7 @@ public class playerMovement : MonoBehaviour {
                 ethereal = true;
                 rb.useGravity = false;
                 rb.velocity = Vector3.zero;
-                Physics.IgnoreLayerCollision(29, 31);
+                Physics.IgnoreLayerCollision(29, 30);
             }
         }
         else
@@ -116,6 +119,7 @@ public class playerMovement : MonoBehaviour {
                 transform.position += new Vector3(0, -movementSpeed, 0) * Time.deltaTime;
             }
         }
+        if(Input.GetKey(KeyCode.None)) anim.SetBool("Moving", false);
     }
 
     void physicsCheck()
