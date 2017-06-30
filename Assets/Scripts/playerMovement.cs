@@ -26,6 +26,7 @@ public class playerMovement : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
+        Debug.DrawRay(transform.position, new Vector3(0, -0.2f, 0) , Color.green);
         if (ethereal)
         {
             _etherealDur -= Time.deltaTime;
@@ -46,16 +47,17 @@ public class playerMovement : MonoBehaviour {
         {
             if (Input.GetKey(KeyCode.D))                                                    //right
             {
-                Vector3 temp = Vector3.Cross(platformNormal, new Vector3(movementSpeed, 0, 0) );
-                Vector3 dir =  Vector3.Cross(temp, platformNormal);
-
+                Vector3 temp = Vector3.Cross(platformNormal, new Vector3(movementSpeed, 0, 0));
+                Vector3 dir = Vector3.Cross(temp, platformNormal);
+                transform.rotation = Quaternion.Euler(0, 90, 0);
                 rb.velocity += dir * Time.deltaTime;
+
             }
             else if (Input.GetKey(KeyCode.A))                                               //left
             {
                 Vector3 temp = Vector3.Cross(platformNormal, new Vector3(movementSpeed, 0, 0));
                 Vector3 dir = Vector3.Cross(temp, platformNormal);
-
+                transform.rotation = Quaternion.Euler(0, 270, 0);
                 rb.velocity -= dir * Time.deltaTime;
             }
             if (Input.GetKey(KeyCode.W) && !inAir)                                     //jump
@@ -70,7 +72,6 @@ public class playerMovement : MonoBehaviour {
                 rb.useGravity = false;
                 rb.velocity = Vector3.zero;
                 Physics.IgnoreLayerCollision(29, 31);
-
             }
         }
         else
@@ -78,10 +79,12 @@ public class playerMovement : MonoBehaviour {
             if (Input.GetKey(KeyCode.D))                                                    //right
             {
                 transform.position += new Vector3(movementSpeed, 0, 0) * Time.deltaTime;
+                transform.rotation = Quaternion.Euler(0, 90, 0);
             }
             else if (Input.GetKey(KeyCode.A))                                               //left
             {
                 transform.position += new Vector3(-movementSpeed, 0, 0) * Time.deltaTime;
+                transform.rotation = Quaternion.Euler(0, 270, 0);
             }
             if (Input.GetKey(KeyCode.W))                                        //float up
             {
@@ -89,7 +92,7 @@ public class playerMovement : MonoBehaviour {
             }
             else if (Input.GetKey(KeyCode.S))                                     //float down
             {
-                transform.position += new Vector3(0 , -movementSpeed, 0) * Time.deltaTime;
+                transform.position += new Vector3(0, -movementSpeed, 0) * Time.deltaTime;
             }
         }
     }
@@ -105,6 +108,7 @@ public class playerMovement : MonoBehaviour {
         else
         {
             inAir = true;
+            platformNormal = Vector3.up;
         }
     }
 
